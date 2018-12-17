@@ -85,7 +85,7 @@ def cholesky_cpu_translation_rule(c, operand):
     # TODO(phawkins): support LAPACK primitives in batched mode.
     return c.Cholesky(operand)
 
-xla.translations[cholesky_p] = cholesky_cpu_translation_rule
+xla.backend_specific_translations['Host'][cholesky_p] = cholesky_cpu_translation_rule
 
 
 triangular_solve_dtype_rule = partial(
