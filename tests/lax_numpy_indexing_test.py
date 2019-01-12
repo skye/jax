@@ -643,6 +643,15 @@ class IndexingTest(jtu.JaxTestCase):
     expected = x[[0, 2, 4], [0, 2, 4]]
     self.assertAllClose(ans, expected, check_dtypes=False)
 
+  def testIssue230(self):
+    y = lnp.arange(35).reshape(5, 7)
+    ans = y[lnp.array([0, 2, 4]), lnp.array([0, 1, 2])]
+
+    y = onp.arange(35).reshape(5, 7)
+    expected = y[onp.array([0, 2, 4]), onp.array([0, 1, 2])]
+
+    self.assertAllClose(ans, expected, check_dtypes=False)
+
 
 if __name__ == "__main__":
   absltest.main()
