@@ -644,12 +644,17 @@ class IndexingTest(jtu.JaxTestCase):
     self.assertAllClose(ans, expected, check_dtypes=False)
 
   def testIssue230(self):
-    y = lnp.arange(35).reshape(5, 7)
-    ans = y[lnp.array([0, 2, 4]), lnp.array([0, 1, 2])]
-
     y = onp.arange(35).reshape(5, 7)
     expected = y[onp.array([0, 2, 4]), onp.array([0, 1, 2])]
 
+    # use lnp.reshape function
+    y = lnp.reshape(lnp.arange(35), (5, 7))
+    ans = y[lnp.array([0, 2, 4]), lnp.array([0, 1, 2])]
+    self.assertAllClose(ans, expected, check_dtypes=False)
+
+    # use .reshape method
+    y = lnp.arange(35).reshape(5, 7)
+    ans = y[lnp.array([0, 2, 4]), lnp.array([0, 1, 2])]
     self.assertAllClose(ans, expected, check_dtypes=False)
 
 
