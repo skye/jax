@@ -2063,10 +2063,21 @@ def index_take_transpose_rule(t, src, *idxs, **kwargs):
   t_src = index_untake(t, _zeros(t, shape=input_shape), idxs, axes)
   return [t_src] + [None] * len(idxs)
 
+def index_take_batch_rule(batched_args, batch_dims, **kwargs):
+  src = batched_args[0]
+  src_bdim = batch_dims[0]
+  idxs = batched_args[1:]
+  idxs_bdims = batch_dims[1:]
+  if any(bdim is not None for bdim in idxs_bdims):
+    raise NotImplementedError  # TODO(mattjj)
+  axes = tuple(i+1 if i >= src_bdim else i for i in kwargs['axes'])
+  return index_take(src, idxs, axes), src_bdim
+
 index_take_p = standard_primitive(index_take_shape_rule, _input_dtype,
                                   'index_take', index_take_translation_rule)
 ad.primitive_jvps[index_take_p] = index_take_jvp
 ad.primitive_transposes[index_take_p] = index_take_transpose_rule
+batching.primitive_batchers[index_take_p] = index_take_batch_rule
 
 
 def index_untake_shape_rule(src, dst, *idxs, **kwargs):
