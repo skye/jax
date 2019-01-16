@@ -365,6 +365,17 @@ class BatchingTest(jtu.JaxTestCase):
     self.assertAllClose(sv, onp.broadcast_to(v[0, ::-1], (3, 4)),
                         check_dtypes=True)
 
+  def testIssue246(self):
+    a = onp.arange(9).reshape((3, 3))
+
+    def f(a):
+      inds = np.arange(a.shape[0])
+      return a[inds]
+
+    ans = vmap(f)(a)
+    expected = np.stack([f(elt) for elt in a])
+    self.assertAllClose(ans, expected, check_dtypes=False)
+
 
 if __name__ == '__main__':
   absltest.main()

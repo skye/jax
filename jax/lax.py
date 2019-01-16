@@ -2068,10 +2068,17 @@ def index_take_batch_rule(batched_args, batch_dims, **kwargs):
   src_bdim = batch_dims[0]
   idxs = batched_args[1:]
   idxs_bdims = batch_dims[1:]
-  if any(bdim is not None for bdim in idxs_bdims):
+
+  if src_bdim is not None and all(bdim is None for bdim in idxs_bdims):
+    axes = tuple(i+1 if i >= src_bdim else i for i in kwargs['axes'])
+    out_bdim = src_bdim + sum(1 if i >= src_bdim else 0 for i in kwargs['axes'])
+    return index_take(src, idxs, axes), out_bdim
+  elif src_bdim is None and any(bdim is not None for bdim in idx_bdims):
+    idxs = [batching.bdim_at_front(i, d).ravel() for i, d in zip(idxs, idx_bdims)]
     raise NotImplementedError  # TODO(mattjj)
-  axes = tuple(i+1 if i >= src_bdim else i for i in kwargs['axes'])
-  return index_take(src, idxs, axes), src_bdim
+  else:
+    raise NotImplementedError  # TODO(mattjj)
+
 
 index_take_p = standard_primitive(index_take_shape_rule, _input_dtype,
                                   'index_take', index_take_translation_rule)
