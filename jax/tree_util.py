@@ -37,10 +37,13 @@ def tree_map(f, tree):
     leaf given by `f(x)` where `x` is the value at the corresponding leaf in
     `tree`.
   """
+  return tree_map2(set(), f, tree)
+
+def tree_map2(leaf_types, f, tree):
   node_type = node_types.get(type(tree))
-  if node_type:
+  if node_type and type(tree) not in leaf_types:
     children, node_spec = node_type.to_iterable(tree)
-    new_children = [tree_map(f, child) for child in children]
+    new_children = [tree_map2(leaf_types, f, child) for child in children]
     return node_type.from_iterable(node_spec, new_children)
   else:
     return f(tree)
@@ -60,23 +63,24 @@ def tree_multimap(f, tree, *rest):
     leaf given by `f(x, *xs)` where `x` is the value at the corresponding leaf
     in `tree` and `xs` is the tuple of values at corresponding leaves in `rest`.
   """
-  # equivalent to prefix_multimap(f, tree_structure(tree), tree, *rest)
+  return tree_multimap2(set(), f, tree, *rest)
+
+def tree_multimap2(leaf_types, f, tree, *rest):
   node_type = node_types.get(type(tree))
-  if node_type:
-    children, node_spec = node_type.to_iterable(tree)
+  if node_type and type(tree) not in leaf_types:
+    children, aux_data = node_type.to_iterable(tree)
     all_children = [children]
     for other_tree in rest:
       other_node_type = node_types.get(type(other_tree))
-      # TODO(mattjj): enable this check
-      # if node_type != other_node_type:
-      #   raise TypeError('Mismatch: {} != {}'.format(other_node_type, node_type))
-      other_children, other_node_data = node_type.to_iterable(other_tree)
-      if other_node_data != node_spec:
-        raise TypeError('Mismatch: {} != {}'.format(other_node_data, node_spec))
+      if node_type != other_node_type:
+        raise TypeError('Mismatch: {} != {}'.format(other_node_type, node_type))
+      other_children, other_aux_data = node_type.to_iterable(other_tree)
+      if other_aux_data != aux_data:
+        raise TypeError('Mismatch: {} != {}'.format(other_aux_data, aux_data))
       all_children.append(other_children)
 
-    new_children = [tree_multimap(f, *xs) for xs in zip(*all_children)]
-    return node_type.from_iterable(node_spec, new_children)
+    new_children = [tree_multimap2(leaf_types, f, *xs) for xs in zip(*all_children)]
+    return node_type.from_iterable(aux_data, new_children)
   else:
     return f(tree, *rest)
 

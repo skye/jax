@@ -29,33 +29,51 @@ import operator
 import jax.numpy as np
 from jax.core import pack
 from jax.util import partial, safe_zip, safe_map, unzip2
+from jax import tree_util
 from jax.tree_util import (tree_map, tree_mimomap, tree_structure,
-                           register_pytree_node)
+                           register_pytree_node, tree_map2)
 
 map = safe_map
 zip = safe_zip
+
+OptimizerState = collections.namedtuple("OptimizerState", ["state"])
+register_pytree_node(OptimizerState,
+                     lambda xs: ((xs.state,), None),
+                     lambda _, xs: OptimizerState(xs[0]))
+
+def opt_tree_map(f, tree, *rest):
+  return tree_util.tree_multimap2({OptimizerState},
+                                  lambda *states: OptimizerState(f(*[s.state for s in states])),
+                                  tree, *rest)
 
 def optimizer(opt_maker):
   """Decorator to make an optimizer map over tuple/list/dict containers."""
   @functools.wraps(opt_maker)
   def tree_opt_maker(*args, **kwargs):
-    init_fun, update_fun = opt_maker(*args, **kwargs)
+    init, update, get_params = opt_maker(*args, **kwargs)
 
-    @functools.wraps(init_fun)
-    def tree_init_fun(x0_tree):
-      return tree_mimomap(init_fun, x0_tree)
+    @functools.wraps(init)
+    def tree_init(x0_tree):
+      return tree_map(lambda x: OptimizerState(init(x)), x0_tree)
 
-    @functools.wraps(update_fun)
-    def tree_update_fun(i, grad_tree, state_trees):
-      return tree_mimomap(partial(update_fun, i), grad_tree, *state_trees)
+    @functools.wraps(update)
+    def tree_update(i, grad_tree, state_tree):
+      return tree_util.tree_multimap2(
+          {OptimizerState},
+          lambda grad, state: OptimizerState(update(i, grad, state.state)),
+          grad_tree, state_tree)
 
-    return tree_init_fun, tree_update_fun
+    @functools.wraps(get_params)
+    def tree_get_params(state_tree):
+      return tree_map2({OptimizerState}, lambda state: get_params(state.state), state_tree)
+
+    return tree_init, tree_update, tree_get_params
   return tree_opt_maker
 
-def iterate(state_trees):
-  """Extract the current iterate from an optimizer state."""
-  return state_trees[0]
-get_params = iterate
+# def iterate(state_trees):
+#   """Extract the current iterate from an optimizer state."""
+#   return state_trees[0]
+# get_params = iterate
 
 # optimizers
 
@@ -68,14 +86,16 @@ def sgd(step_size):
       that maps the iteration index to positive scalar.
 
   Returns:
-    An (init_fun, update_fun) pair.
+    An (init, update) pair.
   """
   step_size = make_schedule(step_size)
-  def init_fun(x0):
-    return (x0,)
-  def update_fun(i, g, x):
-    return (x - step_size(i) * g,)
-  return init_fun, update_fun
+  def init(x0):
+    return x0
+  def update(i, g, x):
+    return x - step_size(i) * g
+  def get_params(x):
+    return x
+  return init, update, get_params
 
 @optimizer
 def momentum(step_size, mass):
@@ -86,17 +106,21 @@ def momentum(step_size, mass):
       that maps the iteration index to positive scalar.
 
   Returns:
-    An (init_fun, update_fun) pair.
+    An (init, update) pair.
   """
   step_size = make_schedule(step_size)
-  def init_fun(x0):
+  def init(x0):
     v0 = np.zeros_like(x0)
     return x0, v0
-  def update_fun(i, g, x, velocity):
+  def update(i, g, state):
+    x, velocity = state
     velocity = mass * velocity - (1. - mass) * g
     x = x + step_size(i) * velocity
     return x, velocity
-  return init_fun, update_fun
+  def get_params(state):
+    x, _ = state
+    return x
+  return init, update, get_params
 
 @optimizer
 def rmsprop(step_size, gamma=0.9, eps=1e-8):
@@ -107,17 +131,21 @@ def rmsprop(step_size, gamma=0.9, eps=1e-8):
       that maps the iteration index to positive scalar.
 
   Returns:
-    An (init_fun, update_fun) pair.
+    An (init, update) pair.
   """
   step_size = make_schedule(step_size)
-  def init_fun(x0):
+  def init(x0):
     avg_sq_grad = np.ones_like(x0)
     return x0, avg_sq_grad
-  def update_fun(i, g, x, avg_sq_grad):
+  def update(i, g, state):
+    x, avg_sq_grad = state
     avg_sq_grad = avg_sq_grad * gamma + g**2 * (1. - gamma)
     x = x - step_size(i) * g / (np.sqrt(avg_sq_grad) + eps)
     return x, avg_sq_grad
-  return init_fun, update_fun
+  def get_params(state):
+    x, _ = state
+    return x
+  return init, update, get_params
 
 @optimizer
 def adam(step_size, b1=0.9, b2=0.999, eps=1e-8):
@@ -134,21 +162,25 @@ def adam(step_size, b1=0.9, b2=0.999, eps=1e-8):
       numerical stability (default 1e-8).
 
   Returns:
-    An (init_fun, update_fun) pair.
+    An (init, update) pair.
   """
   step_size = make_schedule(step_size)
-  def init_fun(x0):
+  def init(x0):
     m0 = np.zeros_like(x0)
     v0 = np.zeros_like(x0)
     return x0, m0, v0
-  def update_fun(i, g, x, m, v):
+  def update(i, g, state):
+    x, m, v = state
     m = (1 - b1) * g + b1 * m  # First  moment estimate.
     v = (1 - b2) * (g ** 2) + b2 * v  # Second moment estimate.
     mhat = m / (1 - b1 ** (i + 1))  # Bias correction.
     vhat = v / (1 - b2 ** (i + 1))
     x = x - step_size(i) * mhat / (np.sqrt(vhat) + eps)
     return x, m, v
-  return init_fun, update_fun
+  def get_params(state):
+    x, m, v = state
+    return x
+  return init, update, get_params
 
 # learning rate schedules
 
@@ -183,10 +215,10 @@ def piecewise_constant(boundaries, values):
     return values[np.sum(i > boundaries)]
   return schedule
 
-def make_schedule(scalar_or_schedule_fun):
-  if callable(scalar_or_schedule_fun):
-    return scalar_or_schedule_fun
-  elif np.ndim(scalar_or_schedule_fun) == 0:
-    return constant(scalar_or_schedule_fun)
+def make_schedule(scalar_or_schedule):
+  if callable(scalar_or_schedule):
+    return scalar_or_schedule
+  elif np.ndim(scalar_or_schedule) == 0:
+    return constant(scalar_or_schedule)
   else:
-    raise TypeError(type(scalar_or_schedule_fun))
+    raise TypeError(type(scalar_or_schedule))

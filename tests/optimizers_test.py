@@ -22,7 +22,7 @@ import functools
 from absl.testing import absltest
 import jax.numpy as np
 import jax.test_util as jtu
-from jax import jit, grad
+from jax import jit, grad, tree_util
 from jax.experimental import optimizers
 from jax.lib import xla_bridge as xla
 
@@ -36,9 +36,12 @@ class OptimizerTests(jtu.JaxTestCase):
     self._CheckRun(optimizer, loss, x0, num_steps, *args, **kwargs)
 
   def _CheckFuns(self, optimizer, loss, x0, *args):
-    init_fun, update_fun = optimizer(*args)
+    init_fun, update_fun, get_params_fun = optimizer(*args)
     opt_state = init_fun(x0)
-    update_fun(0, grad(loss)(x0, None), opt_state)  # doesn't crash
+    self.assertAllClose(x0, get_params_fun(opt_state), check_dtypes=True)
+    opt_state2 = update_fun(0, grad(loss)(x0, None), opt_state)  # doesn't crash
+    self.assertEqual(tree_util.tree_structure(opt_state),
+                     tree_util.tree_structure(opt_state2))
 
   @jtu.skip_on_devices('gpu')
   def _CheckRun(self, optimizer, loss, x0, num_steps, *args, **kwargs):
@@ -157,13 +160,13 @@ class OptimizerTests(jtu.JaxTestCase):
     num_iters = 100
     step_size = 0.1
 
-    init_fun, _ = optimizers.sgd(step_size)
+    init_fun, _, _ = optimizers.sgd(step_size)
     opt_state = init_fun(x0)
 
     @jit
     def update(opt_state, step_size):
-      _, update_fun = optimizers.sgd(step_size)
-      x = optimizers.get_params(opt_state)
+      _, update_fun, get_params = optimizers.sgd(step_size)
+      x = get_params(opt_state)
       g = grad(loss)(x, None)
       return update_fun(0, g, opt_state)
 
