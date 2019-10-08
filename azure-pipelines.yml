@@ -9,15 +9,18 @@ trigger:
 pool:
   vmImage: 'macOS-latest'
 
-steps:
-- task: UsePythonVersion@0
-- script: |
-    brew install pyenv
-    brew install pyenv-virtualenv
-  displayName: brew install
-- script: build/build_jaxlib_wheels_macos.sh
-  displayName: 
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: 'build/dist' 
-    #artifact: # Optional
+jobs:
+- job: build_jaxlib
+  timeoutInMinutes: 0
+  steps:
+  - task: UsePythonVersion@0
+  - script: |
+      brew install pyenv
+      brew install pyenv-virtualenv
+    displayName: brew install
+  - script: build/build_jaxlib_wheels_macos.sh
+    displayName: build_jaxlib_wheels_macos 
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: 'build/dist' 
+      #artifact: # Optional
