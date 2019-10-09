@@ -19,7 +19,8 @@ jobs:
       brew install pyenv-virtualenv
     displayName: brew install
   - script: build/build_jaxlib_wheels_macos.sh
-    displayName: build_jaxlib_wheels_macos 
+    displayName: build_jaxlib_wheels_macos
+    timeoutInMinutes: 0 
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: 'build/dist' 
