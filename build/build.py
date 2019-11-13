@@ -334,10 +334,6 @@ def main():
     config_args += ["--config=mkl_open_source_only"]
   if args.enable_cuda:
     config_args += ["--config=cuda"]
-  print(" ".join([bazel_path] + args.bazel_startup_options +
-    ["run", "--verbose_failures=true"] + config_args +
-    [":install_xla_in_source_tree", os.getcwd()]))
-  os.system("bash")
   shell(
     [bazel_path] + args.bazel_startup_options +
     ["run", "--verbose_failures=true"] + config_args +
