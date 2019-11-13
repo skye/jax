@@ -164,9 +164,9 @@ def check_bazel_version(bazel_path, min_version, max_version):
 
 
 BAZELRC_TEMPLATE = """
-build --repo_env PYTHON_BIN_PATH="{python_bin_path}"
+build --action_env PYTHON_BIN_PATH="{python_bin_path}"
 build --python_path="{python_bin_path}"
-build --repo_env TF_NEED_CUDA="{tf_need_cuda}"
+build --action_env TF_NEED_CUDA="{tf_need_cuda}"
 build --distinct_host_configuration=false
 build --copt=-Wno-sign-compare
 build -c opt
