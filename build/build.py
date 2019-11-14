@@ -125,12 +125,12 @@ def download_and_verify_bazel():
 
 def get_bazel_path(bazel_path_flag):
   """Returns the path to a Bazel binary, downloading Bazel if not found."""
-  # if bazel_path_flag:
-  #   return bazel_path_flag
+  if bazel_path_flag:
+    return bazel_path_flag
 
-  # bazel = which("bazel")
-  # if bazel:
-  #   return bazel
+  bazel = which("bazel")
+  if bazel:
+    return bazel
 
   bazel = download_and_verify_bazel()
   if bazel:
