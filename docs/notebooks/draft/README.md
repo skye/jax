@@ -63,7 +63,7 @@ Once you are in the user GCE VM, from your ssh terminal session, follow the smal
 
 
 ```
-pip install jax==0.1.51 jaxlib==0.1.33
+pip install jax==0.1.54 jaxlib==0.1.37
 ```
 
 
