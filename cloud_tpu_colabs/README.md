@@ -65,7 +65,7 @@ Once you are in the VM, from your ssh terminal session, follow the example below
 
 
 ```
-pip install jax==0.1.54 jaxlib==0.1.37
+pip install --user jax==0.1.54 jaxlib==0.1.37
 ```
 
 
