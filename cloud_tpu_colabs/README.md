@@ -1,16 +1,28 @@
-# Colab links
+# Example Cloud TPU notebooks
 
-Colab links to public github files have the form:
-```
-https://colab.research.google.com/github/<user>/<repo>/blob/<branch>/<path_to_ipynb_file>
-```
+JAX now runs on Cloud TPUs!
 
-- [Pmap Cookbook](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Pmap_Cookbook.ipynb)
-- [Lorentz ODE Solver](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Lorentz_ODE_Solver.ipynb)
-- [Wave Equation](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Wave_Equation.ipynb)
+The following notebooks showcase how to use and what you can do with Cloud TPUs on Colab:
 
+### [Pmap Cookbook](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Pmap_Cookbook.ipynb)
+A guide to getting started with `pmap`, a transform for easily distributing SPMD
+computations across devices.
 
-# Running JAX on TPU from a GCE VM
+### [Lorentz ODE Solver](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Lorentz_ODE_Solver.ipynb)
+Contributed by Alex Alemi (alexalemi@)
+
+Solve and plot parallel ODE solutions with `pmap`.
+
+![lorentz](https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/lorentz.png)
+
+### [Wave Equation](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Wave_Equation.ipynb)
+Contributed by Stephan Hoyer (shoyer@)
+
+Solve the wave equation with `pmap`, and make cool movies.
+
+![wave_movie](https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/wave_movie.gif)
+
+## Running JAX on TPU from a GCE VM
 
 The process of creating Cloud TPU can be followed from this link: https://cloud.google.com/tpu/docs/quickstart
 
