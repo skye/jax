@@ -13,14 +13,14 @@ Contributed by Alex Alemi (alexalemi@)
 
 Solve and plot parallel ODE solutions with `pmap`.
 
-[![](https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/lorentz.png)](#)
+<img src="https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/lorentz.png" width=65%></image>
 
 ### [Wave Equation](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Wave_Equation.ipynb)
 Contributed by Stephan Hoyer (shoyer@)
 
 Solve the wave equation with `pmap`, and make cool movies.
 
-[![](https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/wave_movie.gif)](#)
+![](https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/wave_movie.gif)
 
 ## Running JAX on TPU from a GCE VM
 
