@@ -22,14 +22,11 @@ Solve the wave equation with `pmap`, and make cool movies.
 
 ![](https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/wave_movie.gif)
 
-## Running JAX on TPU from a GCE VM
+## Running JAX on a Cloud TPU from a GCE VM
 
-The process of creating Cloud TPU can be followed from this link: https://cloud.google.com/tpu/docs/quickstart
+Creating a [Cloud TPU](https://cloud.google.com/tpu/docs/quickstart) involves creating the user GCE VM and the TPU node.
 
-If you are already familiar with the process of creating Cloud TPU, the process of creating Cloud TPU involves creating the **user GCE VM** and the **TPU node**.
-
-To create a **user GCE VM**, run the following command from your GCP console or your computer terminal where you have gcloud CLI installed (see [installing gcloud](https://cloud.google.com/sdk/install)).
-
+To create a user GCE VM, run the following command from your GCP console or your computer terminal where you have [gcloud installed](https://cloud.google.com/sdk/install).
 
 ```
 export ZONE=us-central1-c
@@ -42,14 +39,12 @@ gcloud compute instances create $USER-user-vm-0001 \
    --zone=$ZONE
 ```
 
+To create a larger GCE VM, choose a different [machine type](https://cloud.google.com/compute/docs/machine-types).
 
-This is a “default” configuration. To run a bigger compute VM, you may want to pick a different machine-type (see [machine types](https://cloud.google.com/compute/docs/machine-types)).
-
-Next, create the **TPU node**. Please follow this [guideline](https://cloud.google.com/tpu/docs/internal-ip-blocks) to pick a $TPU_IP_ADDRESS.
-
+Next, create the TPU node, following these [guidelines](https://cloud.google.com/tpu/docs/internal-ip-blocks) to choose a <TPU_IP_ADDRESS>.
 
 ```
-export TPU_IP_ADDRESS=<pick-ip-address>
+export TPU_IP_ADDRESS=<TPU_IP_ADDRESS>
 gcloud compute tpus create $USER-tpu-0001 \
       --zone=$ZONE \
       --network=default \
@@ -58,18 +53,13 @@ gcloud compute tpus create $USER-tpu-0001 \
       --version=tpu_driver_nightly
 ```
 
-
-The above command defaults to the ‘tpu_driver_nightly’ version. We may make the other versions available.
-
-Now that you have created both the **user GCE VM** and the **TPU node**, ssh to the **user GCE VM** by executing the following gcloud ssh command:
-
+Now that you have created both the user GCE VM and the TPU node, ssh to the GCE VM by executing the following command:
 
 ```
 gcloud compute ssh $USER-user-vm-0001
 ```
 
-
-Once you are in the user GCE VM, from your ssh terminal session, follow the small instructions and example below to run a simple JAX program.
+Once you are in the VM, from your ssh terminal session, follow the example below to run a simple JAX program.
 
 **Install jax and jaxlib wheels:**
 
@@ -79,13 +69,11 @@ pip install jax==0.1.54 jaxlib==0.1.37
 ```
 
 
-**Create and run the following simple_jax.py program:**
+**Create a program, simple_jax.py:**
 
-**IMPORTANT**: replace the <TPU-IP-ADDRESS> below with the TPU node **IP address** (you can check this from the GCP console **<span style="text-decoration:underline;">Compute Engine > TPUs</span>**.
-
+**IMPORTANT**: Replace <TPU_IP_ADDRESS> below with the TPU node’s IP address. You can get the IP address from the GCP console: Compute Engine > TPUs.
 
 ```
-cat > simple_jax.py
 from jax.config import config
 from jax import random
 
@@ -98,11 +86,7 @@ x = random.normal(key, (10,))
 print(x)
 ```
 
-
-_[press ctrl+c to save the above program ...]_
-
 **Run the program:**
-
 
 ```
 python simplejax.py
