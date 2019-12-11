@@ -89,5 +89,5 @@ print(x)
 **Run the program:**
 
 ```
-python simplejax.py
+python simple_jax.py
 ```
