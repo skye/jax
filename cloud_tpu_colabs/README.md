@@ -4,18 +4,18 @@ JAX now runs on Cloud TPUs!
 
 The following notebooks showcase how to use and what you can do with Cloud TPUs on Colab:
 
-### [Pmap Cookbook](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Pmap_Cookbook.ipynb)
+### [Pmap Cookbook](https://colab.research.google.com/github/skye/jax/blob/nbtest/cloud_tpu_colabs/Pmap_Cookbook.ipynb)
 A guide to getting started with `pmap`, a transform for easily distributing SPMD
 computations across devices.
 
-### [Lorentz ODE Solver](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Lorentz_ODE_Solver.ipynb)
+### [Lorentz ODE Solver](https://colab.research.google.com/github/skye/jax/blob/nbtest/cloud_tpu_colabs/Lorentz_ODE_Solver.ipynb)
 Contributed by Alex Alemi (alexalemi@)
 
 Solve and plot parallel ODE solutions with `pmap`.
 
 <img src="https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/lorentz.png" width=65%></image>
 
-### [Wave Equation](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Wave_Equation.ipynb)
+### [Wave Equation](https://colab.research.google.com/github/skye/jax/blob/nbtest/cloud_tpu_colabs/Wave_Equation.ipynb)
 Contributed by Stephan Hoyer (shoyer@)
 
 Solve the wave equation with `pmap`, and make cool movies! The spatial domain is partitioned across the 8 cores of a Cloud TPU.
@@ -110,3 +110,17 @@ print(x)
 ```
 python simple_jax.py
 ```
+
+## Reporting issues
+
+If you believe you’re experiencing a problem specific to using Cloud TPUs,
+please create an issue in the [Cloud TPU issue
+tracker](https://issuetracker.google.com/issues/new?component=507145). If you’re
+unsure whether it’s problem with Cloud TPUs, JAX, Colab, or anything else, feel
+free to create an issue in the [JAX issue
+tracker](https://github.com/google/jax/issues) and we'll triage it
+appropriately.
+
+If you have any other questions or comments regarding JAX on Cloud TPUs, please
+email jax-tpu@google.com. We’d like to hear from you!
+
