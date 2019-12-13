@@ -18,9 +18,28 @@ Solve and plot parallel ODE solutions with `pmap`.
 ### [Wave Equation](https://colab.research.google.com/github/skye/jax/blob/nbtest/docs/notebooks/draft/Wave_Equation.ipynb)
 Contributed by Stephan Hoyer (shoyer@)
 
-Solve the wave equation with `pmap`, and make cool movies.
+Solve the wave equation with `pmap`, and make cool movies! The spatial domain is partitioned across the 8 cores of a Cloud TPU.
 
-![](https://raw.githubusercontent.com/skye/jax/nbtest/cloud_tpu_colabs/images/wave_movie.gif)
+## Performance notes
+
+The [guidance on running TensorFlow on TPUs](https://cloud.google.com/tpu/docs/performance-guide) applies to JAX as well, with the exception of TensorFlow-specific details. Here we highlight a few important details that are particularly relevant to using TPUs in JAX.
+
+### Padding
+
+One of the most common culprits for surprisingly slow code on TPUs is inadvertent padding:
+- Arrays in the Cloud TPU are tiled. This entails padding one of the dimensions to a multiple of 8, and a different dimension to a multiple of 128.
+- The matrix multiplication unit performs best with pairs of large matrices that minimize the need for padding.
+
+### bfloat16 dtype
+
+By default\*, matrix multiplication in JAX on TPUs [uses bfloat16](https://cloud.google.com/blog/products/ai-machine-learning/bfloat16-the-secret-to-high-performance-on-cloud-tpus) with float32 accumulation. This can be controlled with the `precision` keyword argument on relevant `jax.numpy` functions (`matmul`, `dot`, `einsum`, etc). In particular:
+- `precision=jax.lax.Precision.DEFAULT`: uses mixed bfloat16 precision (fastest)
+- `precision=jax.lax.Precision.HIGH`: uses multiple MXU passes to achieve higher precision
+- `precision=jax.lax.Precision.HIGHEST`: uses even more MXU passes to achieve full float32 precision
+
+JAX also adds the `bfloat16` dtype, which you can use to explicitly cast arrays to bfloat16, e.g., `jax.numpy.array(x, dtype=jax.numpy.bfloat16)`.
+
+\* We might change the default precision in the future, since it is arguably surprising. Please comment/vote on [this issue](https://github.com/google/jax/issues/1856) if it affects you!
 
 ## Running JAX on a Cloud TPU from a GCE VM
 
