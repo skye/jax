@@ -91,3 +91,17 @@ print(x)
 ```
 python simple_jax.py
 ```
+
+## Reporting issues
+
+If you believe you’re experiencing a problem specific to using Cloud TPUs,
+please create an issue in the [Cloud TPU issue
+tracker](https://issuetracker.google.com/issues/new?component=507145). If you’re
+unsure whether it’s problem with Cloud TPUs, JAX, Colab, or anything else, feel
+free to create an issue in the [JAX issue
+tracker](https://github.com/google/jax/issues) and we'll triage it
+appropriately.
+
+If you have any other questions or comments regarding JAX on Cloud TPUs, please
+email jax-tpu@google.com. We’d like to hear from you!
+
