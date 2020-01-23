@@ -60,19 +60,19 @@ def get_python_bin_path(python_bin_path_flag):
 
 # Bazel
 
-BAZEL_BASE_URI = "https://github.com/bazelbuild/bazel/releases/download/0.29.1/"
+BAZEL_BASE_URI = "https://github.com/bazelbuild/bazel/releases/download/0.24.1/"
 BazelPackage = collections.namedtuple("BazelPackage", ["file", "sha256"])
 bazel_packages = {
     "Linux":
         BazelPackage(
-            file="bazel-0.29.1-linux-x86_64",
+            file="bazel-0.24.1-linux-x86_64",
             sha256=
-            "da3031d811f42f6208d24a87984b5b07e1c75afede184cad86eb02bef6c3b9b0"),
+            "e18e2877e18a447eb5d94f5efbec375366d82af6443c6a83a93c62657a7b1c32"),
     "Darwin":
         BazelPackage(
-            file="bazel-0.29.1-darwin-x86_64",
+            file="bazel-0.24.1-darwin-x86_64",
             sha256=
-            "34daae4caafbdb0952415ed6f97f47f03df84df9af146e9eb910ba65c073efdd"),
+            "cf763752550050d117e03659aaa6ccd6f97da1f983a6029300a497fdaeaaec46"),
 }
 
 
@@ -128,9 +128,11 @@ def get_bazel_path(bazel_path_flag):
   if bazel_path_flag:
     return bazel_path_flag
 
-  bazel = which("bazel")
-  if bazel:
-    return bazel
+  # TODO(skye): always download bazel for now, to make sure we get 0.24.1.
+  # Uncomment this when we can use a larger variety of bazels.
+  # bazel = which("bazel")
+  # if bazel:
+  #   return bazel
 
   bazel = download_and_verify_bazel()
   if bazel:
@@ -163,10 +165,13 @@ def check_bazel_version(bazel_path, min_version, max_version):
       sys.exit(0)
 
 
+# TODO(skye): remove --python_version when we upgrade bazel
+# TODO(skye): switch --action_env to --repo_env when we upgrade bazel
 BAZELRC_TEMPLATE = """
-build --repo_env PYTHON_BIN_PATH="{python_bin_path}"
+build --python_version=PY3
+build --action_env PYTHON_BIN_PATH="{python_bin_path}"
 build --python_path="{python_bin_path}"
-build --repo_env TF_NEED_CUDA="{tf_need_cuda}"
+build --action_env TF_NEED_CUDA="{tf_need_cuda}"
 build --distinct_host_configuration=false
 build --copt=-Wno-sign-compare
 build -c opt
@@ -307,7 +312,7 @@ def main():
 
   # Find a working Bazel.
   bazel_path = get_bazel_path(args.bazel_path)
-  check_bazel_version(bazel_path, min_version="0.26.0", max_version=None)
+  check_bazel_version(bazel_path, min_version="0.24.1", max_version=None)
   print("Bazel binary path: {}".format(bazel_path))
 
   python_bin_path = get_python_bin_path(args.python_bin_path)
