@@ -22,7 +22,7 @@ XLA. There are also a handful of related casting utilities.
 
 from functools import partial
 import os
-from typing import Callable, Dict
+from typing import Callable, Dict, Sequence, Tuple, Union
 import warnings
 
 from absl import logging
@@ -264,7 +264,8 @@ def _numpy_array_constant(builder, value, canonicalize_types=True):
     value = normalize_to_xla_dtypes(value)
   return xops.ConstantLiteral(builder, value)
 
-def parameter(builder, num, shape, name=None, replicated=None):
+def parameter(builder, num, shape, name=None, replicated=None, sharding=None,
+              set_sharding=False):
   if name is None:
     name = ''
   if replicated is None:
@@ -272,10 +273,15 @@ def parameter(builder, num, shape, name=None, replicated=None):
   elif isinstance(replicated, bool):
     replicated = [replicated] * shape.leaf_count()
 
-  return xops.Parameter(builder, num,
-                        shape.with_major_to_minor_layout_if_absent(), name,
-                        replicated)
-
+  if sharding or set_sharding:
+    builder.SetSharding(_sharding_to_proto(sharding))
+  try:
+    return xops.Parameter(builder, num,
+                          shape.with_major_to_minor_layout_if_absent(), name,
+                          replicated)
+  finally:
+    if sharding or set_sharding:
+      builder.ClearSharding()
 
 def constant(builder, py_val, canonicalize_types=True):
   """Translate constant `py_val` to a constant, canonicalizing its dtype.
@@ -291,6 +297,38 @@ def constant(builder, py_val, canonicalize_types=True):
     return _constant_handlers[py_type](builder, py_val, canonicalize_types)
   else:
     raise TypeError("No constant handler for type: {}".format(py_type))
+
+# XLA supports arbitrary tuple nesting, but JAX only uses one level of tupling
+# (and our type checkers don't support recursive types).
+SpatialSharding = Union[Sequence[int], None, Tuple[Sequence[int], None]]
+
+def _sharding_to_proto(sharding: SpatialSharding):
+  proto = xla_client.OpSharding()
+  if isinstance(sharding, tuple):
+    if sharding[0] is None or isinstance(sharding[0], tuple):
+      sub_protos = [_sharding_to_proto(s) for s in sharding]
+      proto.type = xla_client.OpSharding.Type.TUPLE
+      proto.tuple_shardings = sub_protos
+      return proto
+
+  if sharding is None:
+    proto.type = xla_client.OpSharding.Type.REPLICATED
+  else:
+    proto.type = xla_client.OpSharding.Type.OTHER
+    proto.tile_assignment_dimensions = list(sharding)
+    proto.tile_assignment_devices = list(range(onp.product(sharding)))
+  return proto
+
+def set_sharding(builder, op, sharding: SpatialSharding):
+  return with_sharding(builder, sharding, xops.CustomCall,
+                       builder, b"Sharding", [op], builder.GetShape(op))
+
+def with_sharding(builder, sharding: SpatialSharding, op_fn, *args, **kwargs):
+  builder.SetSharding(_sharding_to_proto(sharding))
+  try:
+    return op_fn(*args, **kwargs)
+  finally:
+    builder.ClearSharding()
 
 def make_computation_builder(name):
   return xla_client.XlaBuilder(name)

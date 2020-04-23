@@ -601,15 +601,23 @@ def _xla_callable_device(nreps, backend, device, arg_devices):
     else:
       assert False  # Unreachable given the error check in _xla_callable
 
-def _xla_callable_args(c, avals, tuple_args):
+
+def _xla_callable_args(c, avals, tuple_args, arg_partitions=None):
   if not tuple_args:
-    xla_args = [xb.parameter(c, i, aval_to_xla_shape(a))
-                if a is not abstract_token else xops.CreateToken(c)
-                for i, a in enumerate(avals)]
-    return xla_args
+    set_sharding = arg_partitions is not None
+    if arg_partitions is None:
+      arg_partitions = [None] * len(avals)
+    assert len(avals) == len(arg_partitions), (len(avals), len(arg_partitions))
+    return [
+        xb.parameter(c, i, aval_to_xla_shape(a), sharding=sharding,
+                     set_sharding=set_sharding)
+        if a is not abstract_token else xops.CreateToken(c)
+        for i, (a, sharding) in enumerate(zip(avals, arg_partitions))
+    ]
   else:
-    tuple_param = xb.parameter(c, 0, xc.Shape.tuple_shape(
-        [aval_to_xla_shape(a) for a in avals if a is not abstract_token]))
+    tuple_shape = xc.Shape.tuple_shape(
+        [aval_to_xla_shape(a) for a in avals if a is not abstract_token])
+    tuple_param = xb.parameter(c, 0, tuple_shape, sharding=arg_partitions)
     xla_inputs = iter(xla_destructure(c, tuple_param))
     xla_args = [next(xla_inputs) if a is not abstract_token else
                 xops.CreateToken(c) for a in avals]
