@@ -210,7 +210,13 @@ def _shard_array(x, devices, indices):
   return [xla.device_put(x[i], d) for (i, d) in zip(indices, devices)]
 for _t in array_types:
   shard_arg_handlers[_t] = _shard_array
-shard_arg_handlers[xla.DeviceArray] = _shard_array
+
+def _shard_device_array(x, devices, assignments):
+  nrep = len(devices)
+  xs = x._unstack()
+  return (xla.device_put(xs[assignments[r]], devices[r])
+          for r in range(nrep))
+shard_arg_handlers[xla.DeviceArray] = _shard_device_array
 
 def shard_aval(size, aval):
   try:
