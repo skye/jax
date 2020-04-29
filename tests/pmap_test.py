@@ -55,6 +55,7 @@ def setUpModule():
                                " --xla_force_host_platform_device_count=8")
   # Clear any cached backends so new CPU backend will pick up the env var.
   xla_bridge.get_backend.cache_clear()
+  xla_bridge.xla_client._local_backends = None
 
 # Reset to previous configuration in case other test modules will be run.
 def tearDownModule():
