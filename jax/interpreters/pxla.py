@@ -828,6 +828,36 @@ def get_num_partitions(*partitions):
   return num_partitions_set.pop()
 
 
+def get_global_aval(local_aval, global_parts: PartitionsOrReplicated,
+                     local_parts: PartitionsOrReplicated):
+  if global_parts is None:
+    return local_aval
+  assert local_parts is not None
+  global_shape = [dim * _safe_div(ngparts, nlparts)
+                  for dim, ngparts, nlparts
+                  in safe_zip(local_aval.shape, global_parts, local_parts)]
+  return ShapedArray(global_shape, local_aval.dtype)
+
+
+def get_local_aval(global_aval, global_parts: PartitionsOrReplicated,
+                    local_parts: PartitionsOrReplicated):
+  if global_aval is core.abstract_unit:
+    return global_aval
+  if global_parts is None:
+    return global_aval
+  assert local_parts is not None
+  local_shape = [_safe_div(dim, _safe_div(ngparts, nlparts))
+                 for dim, ngparts, nlparts
+                 in safe_zip(global_aval.shape, global_parts, local_parts)]
+  return ShapedArray(local_shape, global_aval.dtype)
+
+
+def _safe_div(x, y):
+  result, ragged = divmod(x, y)
+  assert not ragged, f"{x} % {y} != 0"
+  return result
+
+
 class ResultToPopulate: pass
 result_to_populate = ResultToPopulate()
 
