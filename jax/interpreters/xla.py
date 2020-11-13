@@ -761,8 +761,10 @@ _replicated_param = object()
 def _xla_callable_args(
     c, avals, tuple_args, replicated=None,
     partitions: Optional[Sequence[Optional[Sequence[int]]]] = None,
+    logical_devices: Optional[Sequence[Sequence[int]]] = None,
     donated_invars = None):
   assert partitions is None or len(partitions) == len(avals)
+  assert logical_devices is None or len(logical_devices) == len(avals)
   if not tuple_args:
     if replicated is None:
       replicated = [None] * len(avals)
@@ -771,10 +773,12 @@ def _xla_callable_args(
     else:
       parts = [_replicated_param if part is None else part
                for part in partitions]
+    if logical_devices is None:
+      logical_devices = [None] * len(avals)
     counts = it.count()
-    xla_args = [_xla_param(c, next(counts), xla_shape, r, p)
+    xla_args = [_xla_param(c, next(counts), xla_shape, r, p, d)
                 if a is not abstract_token else xops.CreateToken(c)
-                for (a, r, p) in safe_zip(avals, replicated, parts)
+                for (a, r, p, d) in safe_zip(avals, replicated, parts, logical_devices)
                 for xla_shape in aval_to_xla_shapes(a)]
     if donated_invars is not None:
       donated_invars = [d
@@ -786,24 +790,26 @@ def _xla_callable_args(
       replicated = [r for a, r in zip(avals, replicated)
                     if a is not abstract_token]
     tuple_parts = tuple(partitions) if partitions is not None else None
+    tuple_devices = tuple(logical_devices) if logical_devices is not None else None
     tuple_shape = xc.Shape.tuple_shape(
         [shape for a in avals for shape in aval_to_xla_shapes(a) if a is not abstract_token])
-    tuple_param = _xla_param(c, 0, tuple_shape, replicated, tuple_parts)
+    tuple_param = _xla_param(c, 0, tuple_shape, replicated, tuple_parts, tuple_devices)
     xla_inputs = iter(xla_destructure(c, tuple_param))
     xla_args = [next(xla_inputs) if a is not abstract_token else
                 xops.CreateToken(c) for a in avals]
     assert next(xla_inputs, None) is None
     return xla_args, donated_invars
 
-def _xla_param(builder, param_num, xla_shape, replicated, partitions):
+def _xla_param(builder, param_num, xla_shape, replicated, partitions,
+               logical_devices):
   make_param = partial(xb.parameter, builder, param_num, xla_shape,
                        replicated=replicated)
   if partitions is None:
     return make_param()
   elif partitions is _replicated_param:
-    return xb.with_sharding(builder, None, make_param)
+    return xb.with_sharding(builder, None, None, make_param)
   else:
-    return xb.with_sharding(builder, partitions, make_param)
+    return xb.with_sharding(builder, partitions, logical_devices, make_param)
 
 def _execute_compiled(compiled: XlaExecutable, avals, handlers, *args):
   device, = compiled.local_devices()

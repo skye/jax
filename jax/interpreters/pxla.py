@@ -632,7 +632,8 @@ def parallel_callable(fun: lu.WrappedFun,
   num_global_replicas = global_axis_size * jaxpr_replicas
 
   (arg_parts, out_parts, num_partitions, local_arg_parts, local_out_parts,
-   local_num_partitions) = _find_partitions(jaxpr)
+   local_num_partitions, logical_devices_in, logical_devices_out
+   ) = _find_partitions(jaxpr)
 
   if local_num_partitions is None:
     # TODO(skye): I think this isn't quite right due to replicas
@@ -656,6 +657,8 @@ def parallel_callable(fun: lu.WrappedFun,
   logging.vlog(2, "local_arg_parts: %s", local_arg_parts)
   logging.vlog(2, "out_parts: %s", out_parts)
   logging.vlog(2, "local_out_parts: %s", local_out_parts)
+  logging.vlog(2, "logical_devices_in: %s", logical_devices_in)
+  logging.vlog(2, "logical_devices_out: %s", logical_devices_out)
   logging.vlog(2, "devices: %s", devices)
   logging.vlog(2, "local_devices: %s", local_devices)
 
@@ -706,7 +709,7 @@ def parallel_callable(fun: lu.WrappedFun,
                                   extend_name_stack(wrap_name(name, 'pmap')), *xla_args)
   build_out_tuple = partial(xops.Tuple, c, out_nodes)
   if out_parts is not None:
-    out_tuple = xb.with_sharding(c, out_parts, build_out_tuple)
+    out_tuple = xb.with_sharding(c, out_parts, logical_devices_out, build_out_tuple)
   else:
     out_tuple = build_out_tuple()
   backend = xb.get_backend(backend_name)
@@ -815,8 +818,10 @@ def _find_partitions(jaxpr) -> Tuple[
               num_partitions,
               eqn.params["local_in_parts"],
               eqn.params["local_out_parts_thunk"](),
-              eqn.params["local_num_partitions"])
-  return None, None, 1, None, None, None
+              eqn.params["local_num_partitions"],
+              eqn.params["logical_devices_in"],
+              eqn.params["logical_devices_out_thunk"]())
+  return None, None, 1, None, None, None, None, None
 def reconcile_num_partitions(jaxpr, outer_num_parts: Optional[int]):
   """Returns the total number of partitions to use.
 

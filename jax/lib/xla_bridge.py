@@ -22,7 +22,7 @@ XLA. There are also a handful of related casting utilities.
 
 from functools import partial
 import os
-from typing import Callable, Dict, Tuple, Union
+from typing import Callable, Dict, Optional, Sequence, Tuple, Union
 
 from absl import logging
 # Disable "WARNING: Logging before flag parsing goes to stderr." message
@@ -342,7 +342,12 @@ SpatialSharding = Union[Tuple[int, ...],
                         None,
                         Tuple[Union[Tuple[int, ...], None], ...]]
 
-def _sharding_to_proto(sharding: SpatialSharding):
+
+ShardingDevices = Union[Sequence[int],
+                        Tuple[Sequence[int], ...]]
+
+def _sharding_to_proto(sharding: SpatialSharding,
+                       devices: Optional[ShardingDevices] = None):
   """Converts a SpatialSharding to an OpSharding.
 
   See
@@ -352,7 +357,10 @@ def _sharding_to_proto(sharding: SpatialSharding):
   proto = xla_client.OpSharding()
   if isinstance(sharding, tuple) and not isinstance(sharding[0], int):
       assert all(s is None or isinstance(s, tuple) for s in sharding)
-      sub_protos = [_sharding_to_proto(s) for s in sharding]  # type: ignore
+      if devices is None:
+        devices = (None,) * len(sharding)
+      assert len(devices) == len(sharding)
+      sub_protos = [_sharding_to_proto(s, d) for s, d in zip(sharding, devices)]  # type: ignore
       proto.type = xla_client.OpSharding.Type.TUPLE
       proto.tuple_shardings = sub_protos
       return proto
@@ -362,19 +370,26 @@ def _sharding_to_proto(sharding: SpatialSharding):
   else:
     proto.type = xla_client.OpSharding.Type.OTHER
     proto.tile_assignment_dimensions = list(sharding)
-    proto.tile_assignment_devices = list(range(np.product(sharding)))
+    if devices is not None:
+      assert all(isinstance(d, int) for d in devices), devices
+      proto.tile_assignment_devices = devices
+    else:
+      proto.tile_assignment_devices = list(range(np.product(sharding)))
   return proto
 
-def set_sharding(builder, op, sharding: SpatialSharding):
+def set_sharding(builder, op, sharding: SpatialSharding,
+                 devices: Optional[ShardingDevices] = None):
   """Uses CustomCall to annotate a value as sharded."""
   # "Sharding" is a built-in custom call target that acts like an identity
   # function, and is used to attach an OpSharding to.
-  return with_sharding(builder, sharding, xops.CustomCall,
+  return with_sharding(builder, sharding, devices, xops.CustomCall,
                        builder, b"Sharding", [op], builder.get_shape(op))
 
-def with_sharding(builder, sharding: SpatialSharding, op_fn, *args, **kwargs):
+def with_sharding(builder, sharding: SpatialSharding,
+                  devices: Optional[ShardingDevices],
+                  op_fn, *args, **kwargs):
   """Builds op_fn(*args, **kwargs) with sharding annotation."""
-  builder.set_sharding(_sharding_to_proto(sharding))
+  builder.set_sharding(_sharding_to_proto(sharding, devices))
   try:
     return op_fn(*args, **kwargs)
   finally:
