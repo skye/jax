@@ -48,6 +48,12 @@ def cloud_tpu_init():
   # automatically.
   if any([
       os.environ.get('CLOUD_TPU_TASK_ID', None),
+      os.environ.get('TPU_CHIPS_PER_PROCESS_BOUNDS', None),
+      os.environ.get('TPU_PROCESS_BOUNDS', None),
+      os.environ.get('TPU_PROCESS_ADDRESSES', None),
+      os.environ.get('TPU_PROCESS_PORT', None),
+      os.environ.get('TPU_VISIBLE_CHIPS', None),
+      # Also include the deprecated env vars until they're removed.
       os.environ.get('TPU_CHIPS_PER_HOST_BOUNDS', None),
       os.environ.get('TPU_HOST_BOUNDS', None),
       os.environ.get('TPU_MESH_CONTROLLER_ADDRESS', None),
@@ -91,9 +97,12 @@ def cloud_tpu_init():
   }
 
   os.environ['CLOUD_TPU_TASK_ID'] = worker_id
-  os.environ['TPU_CHIPS_PER_HOST_BOUNDS'] = '2,2,1'
-  os.environ['TPU_HOST_BOUNDS'] = accelerator_type_to_host_bounds[
+  os.environ['TPU_CHIPS_PER_PROCESS_BOUNDS'] = '2,2,1'
+  os.environ['TPU_PROCESS_BOUNDS'] = accelerator_type_to_host_bounds[
       accelerator_type]
-  os.environ['TPU_MESH_CONTROLLER_ADDRESS'] = worker_network_endpoints.split(
-      ',')[0].split(':')[2] + ':8476'
-  os.environ['TPU_MESH_CONTROLLER_PORT'] = '8476'
+  os.environ['TPU_MESH_CONTROLLER_ADDRESS'] = ','.join(
+      # Example endpoint: t1v-n-38e2dc35-w-0:205993197446604866:10.142.0.21
+      # We just need the internal IP address at the end.
+      endpoint.split(':')[2] + ':8471'
+      for endpoint in worker_network_endpoints.split(','))
+  os.environ['TPU_MESH_CONTROLLER_PORT'] = '8471'
