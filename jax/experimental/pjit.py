@@ -25,6 +25,7 @@ from jax.experimental.global_device_array import GlobalDeviceArray as GDA
 from jax import core
 from jax import linear_util as lu
 from jax._src.api import _check_callable, _check_arg, Lowered
+from jax._src.config import config
 from jax._src import dispatch
 from jax._src import source_info_util
 from jax._src.api_util import (argnums_partial_except, flatten_axes,
@@ -544,8 +545,20 @@ def _pjit_call_impl(*args, jaxpr,
       jaxpr, in_axis_resources, out_axis_resources,
       resource_env, donated_invars, name, in_positional_semantics,
       out_positional_semantics).compile()
-  distributed_debug_log(("Running pjit'd function", name),
-                        ("mesh", resource_env.physical_mesh))
+  if config.jax_distributed_debug:
+    # Defensively only perform fingerprint logic if debug logging is enabled
+    # NOTE(skyewm): I didn't benchmark this
+    fingerprint = None
+    if hasattr(compiled.xla_executable, "fingerprint"):
+      fingerprint = compiled.xla_executable.fingerprint
+    if fingerprint is not None:
+      fingerprint = fingerprint.hex()
+    distributed_debug_log(("Running pjit'd function", name),
+                          ("mesh", resource_env.physical_mesh),
+                          ("in_axis_resources", in_axis_resources),
+                          ("out_axis_resources", out_axis_resources),
+                          ("abstract args", list(map(xla.abstractify, args))),
+                          ("fingerprint", fingerprint))
   return compiled.unsafe_call(*args)
 pjit_p.def_impl(_pjit_call_impl)
 
