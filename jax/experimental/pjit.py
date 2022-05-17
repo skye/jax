@@ -554,10 +554,10 @@ def _pjit_call_impl(*args, jaxpr,
     if fingerprint is not None:
       fingerprint = fingerprint.hex()
     distributed_debug_log(("Running pjit'd function", name),
-                          ("mesh", resource_env.physical_mesh),
-                          ("in_axis_resources", in_axis_resources),
-                          ("out_axis_resources", out_axis_resources),
-                          ("abstract args", list(map(xla.abstractify, args))),
+                          # ("mesh", resource_env.physical_mesh),
+                          # ("in_axis_resources", in_axis_resources),
+                          # ("out_axis_resources", out_axis_resources),
+                          # ("abstract args", list(map(xla.abstractify, args))),
                           ("fingerprint", fingerprint))
   return compiled.unsafe_call(*args)
 pjit_p.def_impl(_pjit_call_impl)
