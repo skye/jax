@@ -61,11 +61,11 @@ jobs:
 
   report:
     name: report
-    needs: upstream-dev
+    needs: cloud-tpu-test
     if: |
       failure()
       && github.event_name == 'schedule'
-      && needs.upstream-dev.outputs.artifacts_availability == 'true'
+      && needs.cloud-tpu-test.outputs.artifacts_availability == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
