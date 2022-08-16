@@ -37,16 +37,19 @@ jobs:
           JAX_NUM_GENERATED_CASES: 1
           JAX_ENABLE_X64: true
           JAX_ENABLE_CHECKS: true
+          JAX_PLATFORMS: tpu,cpu
         run: |
-          echo "JAX_NUM_GENERATED_CASES=$JAX_NUM_GENERATED_CASES"
-          echo "JAX_ENABLE_X64=$JAX_ENABLE_X64"
-          echo "JAX_ENABLE_CHECKS=$JAX_ENABLE_CHECKS"
-          pytest --tb=short -rf \
-              --report-log output-${{ matrix.python-version }}-log.jsonl \
-              tests \
-              || (
-                echo '::set-output name=ARTIFACTS_AVAILABLE::true' && false
-              )
+          python3 -c "import jax; print(jax.devices()); print(jax.numpy.add(1,1))"
+        #run: |
+         # echo "JAX_NUM_GENERATED_CASES=$JAX_NUM_GENERATED_CASES"
+          #echo "JAX_ENABLE_X64=$JAX_ENABLE_X64"
+          #echo "JAX_ENABLE_CHECKS=$JAX_ENABLE_CHECKS"
+          #pytest --tb=short -rf \
+          #    --report-log output-${{ matrix.python-version }}-log.jsonl \
+          #    tests \
+          #    || (
+          #      echo '::set-output name=ARTIFACTS_AVAILABLE::true' && false
+          #    )
       - name: Upload artifacts
         if: |
           failure()
