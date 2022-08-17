@@ -36,7 +36,10 @@ jobs:
         env:
           JAX_PLATFORMS: tpu,cpu
         run: |
-          python3 -m pytest --tb=short -rf \
+          pytest --tb=short \
+              --deselect tests/checkify_test.py \
+              --deselect tests/debugging_primitives_test.py \
+              --deselect tests/jaxpr_effects_test.py-rf \
               --report-log output-${{ matrix.python-version }}-log.jsonl \
               tests \
               || (
