@@ -34,14 +34,8 @@ jobs:
         if: success()
         id: status
         env:
-          JAX_NUM_GENERATED_CASES: 1
-          JAX_ENABLE_X64: true
-          JAX_ENABLE_CHECKS: true
           JAX_PLATFORMS: tpu,cpu
         run: |
-          echo "JAX_NUM_GENERATED_CASES=$JAX_NUM_GENERATED_CASES"
-          echo "JAX_ENABLE_X64=$JAX_ENABLE_X64"
-          echo "JAX_ENABLE_CHECKS=$JAX_ENABLE_CHECKS"
           python3 -m pytest --tb=short -rf \
               --report-log output-${{ matrix.python-version }}-log.jsonl \
               tests \
