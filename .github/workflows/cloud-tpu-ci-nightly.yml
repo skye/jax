@@ -37,9 +37,11 @@ jobs:
         env:
           JAX_PLATFORMS: tpu,cpu
         run: |
-          pytest --tb=short tests/compilation_cache_test.py \
+          pytest --tb=short \
+              --report-log output-${{ matrix.python-version }}-log.jsonl \
+              tests/compilation_cache_test.py \
               || (
-                echo '::set-output name=ARTIFACTS_AVAILABLE::true' && false
+                echo '::set-output name=ARTIFACTS_AVAILABLE::true' &&
               )
         # run: |
         #   pytest --tb=short \
