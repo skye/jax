@@ -41,7 +41,7 @@ jobs:
               --report-log output-${{ matrix.python-version }}-log.jsonl \
               tests/compilation_cache_test.py \
               || (
-                echo '::set-output name=ARTIFACTS_AVAILABLE::true' &&
+                echo '::set-output name=ARTIFACTS_AVAILABLE::true' && false
               )
         # run: |
         #   pytest --tb=short \
