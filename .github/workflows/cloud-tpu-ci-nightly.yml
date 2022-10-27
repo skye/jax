@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: "0 14 * * *"  # daily at 7am PST
   workflow_dispatch:  # allows triggering the workflow run manually
+  pull_request:
 
 jobs:
   cloud-tpu-test:
