@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   cloud-tpu-test:
-    runs-on: v4-8
+    runs-on: [self-hosted, tpu, v4-8]
     defaults:
       run:
         shell: bash -l {0}
@@ -21,9 +21,11 @@ jobs:
         python-version: ["3.10"]  # TODO(jakevdp): update to 3.11 when available.
         jaxlib-version: [latest, nightly]
     steps:
-      - uses: actions/checkout@v3
+      # https://opensource.google/documentation/reference/github/services#actions
+      # mandates using a specific commit for non-Google actions.
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install JAX test requirements
