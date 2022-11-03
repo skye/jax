@@ -23,12 +23,13 @@ if [ "$#" -ne 3 ]; then
   echo "Usage: setup_runner.sh <runner name> <tags> <github token>"
 fi
 
-runner_name=$1
-runner_tags=$2
-runner_token=$3
+runner_name="$1"
+runner_tags="$2"
+runner_token="$3"
 
 # Secret fourth argument for setting the repo URL. Useful for testing with forks.
-jax_repo_url=$4
+# - sets empty string as default to avoid unbound variable error from set -u
+jax_repo_url="${4-}"
 if [ -z "${jax_repo_url}" ]; then
   jax_repo_url="https://github.com/google/jax"
 fi
