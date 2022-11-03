@@ -17,4 +17,4 @@
 # More or less copied from
 # https://github.com/iree-org/iree/tree/main/build_tools/github_actions/runner/config
 
-~/actions-runner/run.sh > /tmp/actions-runner.`date +"%Y%m%d-%H%M"`.log
+~/actions-runner/run.sh &> /tmp/actions-runner.`date +"%Y%m%d-%H%M"`.log

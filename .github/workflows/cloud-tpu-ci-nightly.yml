@@ -5,16 +5,14 @@ on:
     - cron: "0 14 * * *"  # daily at 7am PST
   workflow_dispatch:  # allows triggering the workflow run manually
 
-# Should also be set to read-only in the project settings.
+# This should also be set to read-only in the project settings, but it's nice to
+# document and enforce the permissions here.
 permissions:
   contents: read
 
 jobs:
   cloud-tpu-test:
     runs-on: [self-hosted, tpu, v4-8]
-    defaults:
-      run:
-        shell: bash -l {0}
     strategy:
       fail-fast: false  # don't cancel all jobs on failure
       matrix:
@@ -23,9 +21,9 @@ jobs:
     steps:
       # https://opensource.google/documentation/reference/github/services#actions
       # mandates using a specific commit for non-Google actions.
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984
+        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install JAX test requirements
