@@ -17,7 +17,7 @@ jobs:
       fail-fast: false  # don't cancel all jobs on failure
       matrix:
         python-version: ["3.10"]  # TODO(jakevdp): update to 3.11 when available.
-        jaxlib-version: [latest, nightly]
+        jaxlib-version: [latest]
     steps:
       # https://opensource.google/documentation/reference/github/services#actions
       # mandates using a specific commit for non-Google actions.
@@ -56,4 +56,5 @@ jobs:
       - name: Run tests
         env:
           JAX_PLATFORMS: tpu,cpu
-        run: python -m pytest --tb=short tests examples
+        # run: python -m pytest --tb=short tests examples
+        run: python -c 'import jax; print(jax.lib.xla_bridge.get_backend().platform_version)'
