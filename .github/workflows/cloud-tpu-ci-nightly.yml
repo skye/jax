@@ -12,48 +12,19 @@ permissions:
 
 jobs:
   cloud-tpu-test:
-    runs-on: [self-hosted, tpu, v4-8]
     strategy:
       fail-fast: false  # don't cancel all jobs on failure
       matrix:
         python-version: ["3.10"]  # TODO(jakevdp): update to 3.11 when available.
-        jaxlib-version: [latest, nightly]
+        jaxlib-version: [latest]
     steps:
-      # https://opensource.google/documentation/reference/github/services#actions
-      # mandates using a specific commit for non-Google actions.
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install JAX test requirements
+      - name: test step
+        run: exit 1
+      - name: chat
+        if: failure()
         run: |
-          pip install -r build/test-requirements.txt
-      - name: Install JAX
-        run: |
-          pip uninstall -y jax jaxlib libtpu-nightly
-          if [ "${{ matrix.jaxlib-version }}" == "latest" ]; then
-            pip install .[tpu] \
-              -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
-
-          elif [ "${{ matrix.jaxlib-version }}" == "nightly" ]; then
-            pip install .
-            pip install --pre jaxlib \
-              -f https://storage.googleapis.com/jax-releases/jaxlib_nightly_releases.html
-            pip install libtpu-nightly \
-              -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
-
-          else
-            echo "Unknown jaxlib-version: ${{ matrix.jaxlib-version }}"
-            exit 1
-          fi
-
-          python3 -c 'import jax; print("jax version:", jax.__version__)'
-          python3 -c 'import jaxlib; print("jaxlib version:", jaxlib.__version__)'
-          python3 -c 'import jax; print("libtpu version:",
-            jax.lib.xla_bridge.get_backend().platform_version)'
-
-      - name: Run tests
-        env:
-          JAX_PLATFORMS: tpu,cpu
-        run: python -m pytest --tb=short tests examples
+            curl --location --request POST '${{ secrets.ACTION_FAILURE_WEBHOOK }}' \
+            --header 'Content-Type: application/json' \
+            --data-raw "{
+            'text': '$GITHUB_JOB job failed: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID'
+            }"
