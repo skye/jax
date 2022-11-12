@@ -27,5 +27,5 @@ jobs:
             curl --location --request POST '${{ secrets.ACTION_FAILURE_WEBHOOK }}' \
             --header 'Content-Type: application/json' \
             --data-raw "{
-            'text': '$GITHUB_WORKFLOW job failed: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID'
+            'text': '\"$GITHUB_WORKFLOW\" job failed: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID'
             }"
