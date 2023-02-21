@@ -39,9 +39,9 @@ jobs:
 
           elif [ "${{ matrix.jaxlib-version }}" == "nightly" ]; then
             pip install .
-            pip install --pre jaxlib \
+            pip install --pre -U jaxlib \
               -f https://storage.googleapis.com/jax-releases/jaxlib_nightly_releases.html
-            pip install libtpu-nightly \
+            pip install --pre -U libtpu-nightly \
               -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
             pip install requests
 
