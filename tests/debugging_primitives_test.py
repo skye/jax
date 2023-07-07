@@ -1196,5 +1196,23 @@ class InspectShardingTest(jtu.JaxTestCase):
 if not rich:
   del VisualizeShardingTest
 
+
+class FooTest(jtu.JaxTestCase):
+  
+  def test_import_tpu_dialect(self):
+    from jax._src.lib import tpu_mosaic
+    from mlir import ir
+    ctx = ir.Context()
+    tpu_mosaic.tpu_dialect.register_tpu_dialect(ctx)
+    print(dir(tpu_mosaic.tpu_dialect))
+
+  def test_import_tpu_passes(self):
+    from jax._src.lib import tpu_mosaic
+    print(dir(tpu_mosaic))
+
+  def test_import_tpu_custom_call(self):
+    from jax._src import tpu_custom_call
+    print(dir(tpu_custom_call))
+
 if __name__ == '__main__':
   absltest.main(testLoader=jtu.JaxTestLoader())

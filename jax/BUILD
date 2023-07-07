@@ -114,6 +114,7 @@ py_library_providing_imports_info(
         "_src/public_test_util.py",
         "_src/random.py",
         "_src/stages.py",
+        "_src/tpu_custom_call.py",
     ] + glob(
         [
             "*.py",
