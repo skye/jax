@@ -251,11 +251,7 @@ class VectorLayoutInferer {
     return match_terminator(block.getTerminator());
   }
 
-  template <typename Op>
-  LogicalResult infer(Op op);
-
-  template <>
-  LogicalResult infer<arith::ConstantOp>(arith::ConstantOp op) {
+  LogicalResult infer(arith::ConstantOp op) {
     if (op.getType().isSignlessIntOrIndexOrFloat()) {
       setOutLayout(op, kNoLayout);
       return success();
@@ -301,8 +297,7 @@ class VectorLayoutInferer {
     return failure();
   }
 
-  template <>
-  LogicalResult infer<arith::ExtFOp>(arith::ExtFOp op) {
+  LogicalResult infer(arith::ExtFOp op) {
     auto src_ty = dyn_cast<VectorType>(op.getIn().getType());
     if (!src_ty) {
       setLayout(op, kNoLayout, kNoLayout);
@@ -335,8 +330,7 @@ class VectorLayoutInferer {
     return failure();
   }
 
-  template <>
-  LogicalResult infer<arith::TruncFOp>(arith::TruncFOp op) {
+  LogicalResult infer(arith::TruncFOp op) {
     auto src_ty = dyn_cast<VectorType>(op.getIn().getType());
     if (!src_ty) {
       setLayout(op, kNoLayout, kNoLayout);
@@ -380,14 +374,12 @@ class VectorLayoutInferer {
     return failure();
   }
 
-  template <>
-  LogicalResult infer<cf::AssertOp>(cf::AssertOp op) {
+  LogicalResult infer(cf::AssertOp op) {
     setInLayout(op, {kNoLayout});
     return success();
   }
 
-  template <>
-  LogicalResult infer<func::FuncOp>(func::FuncOp op) {
+  LogicalResult infer(func::FuncOp op) {
     if (!op.getBody().hasOneBlock()) {
       op.emitOpError("Only one block functions supported");
       return failure();
@@ -405,8 +397,7 @@ class VectorLayoutInferer {
         });
   }
 
-  template <>
-  LogicalResult infer<memref::LoadOp>(memref::LoadOp op) {
+  LogicalResult infer(memref::LoadOp op) {
     CHECK_OP(op.getType().isSignlessIntOrIndexOrFloat(),
              "memref.load with non-scalar result");
     SmallVector<Layout, 5> in_layout(op.getNumOperands(), {kNoLayout});
@@ -414,8 +405,7 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<scf::IfOp>(scf::IfOp op) {
+  LogicalResult infer(scf::IfOp op) {
     static LogicalResult (*match_yield)(Operation *) = [](Operation *op) {
       CHECK_OP(isa<scf::YieldOp>(op), "expected yield terminator");
       return success();
@@ -463,28 +453,24 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<tpu::EraseLayoutOp>(tpu::EraseLayoutOp op) {
+  LogicalResult infer(tpu::EraseLayoutOp op) {
     setLayout(op, kNoLayout, kNoLayout);
     return success();
   }
 
-  template <>
-  LogicalResult infer<tpu::GatherOp>(tpu::GatherOp op) {
+  LogicalResult infer(tpu::GatherOp op) {
     auto src_layout = getLayout(op.getSource());
     setLayout(op, src_layout, src_layout);
     return success();
   }
 
-  template <>
-  LogicalResult infer<tpu::RepeatOp>(tpu::RepeatOp op) {
+  LogicalResult infer(tpu::RepeatOp op) {
     auto src_layout = getLayout(op.getSource());
     setLayout(op, src_layout, src_layout);
     return success();
   }
 
-  template <>
-  LogicalResult infer<tpu::TraceOp>(tpu::TraceOp op) {
+  LogicalResult infer(tpu::TraceOp op) {
     static LogicalResult (*match_yield)(Operation *) = [](Operation *op) {
       CHECK_OP(isa<tpu::YieldOp>(op), "expected yield terminator");
       return success();
@@ -494,8 +480,7 @@ class VectorLayoutInferer {
     return inferBlock(*op.getBody(), match_yield);
   }
 
-  template <>
-  LogicalResult infer<tpu::IotaOp>(tpu::IotaOp op) {
+  LogicalResult infer(tpu::IotaOp op) {
     auto ty = op.getResult().getType();
     CHECK_OP(ty.getElementType().isSignlessInteger(32),
              "Only 32-bit integer iota supported");
@@ -512,8 +497,7 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<vector::BroadcastOp>(vector::BroadcastOp op) {
+  LogicalResult infer(vector::BroadcastOp op) {
     auto some_src_ty = op.getSourceType();
     auto res_ty = op.getResultVectorType();
     CHECK_OP(res_ty.getRank() > 0, "rank 0 vectors unsupported");
@@ -557,8 +541,7 @@ class VectorLayoutInferer {
     return failure();
   }
 
-  template <>
-  LogicalResult infer<vector::ContractionOp>(vector::ContractionOp op) {
+  LogicalResult infer(vector::ContractionOp op) {
     // TODO(apaszke): Support layout here, at least on batch dimensions.
     CHECK_OP(op.getKind() == vector::CombiningKind::ADD, "Only ADD supported");
     auto ctx = op.getContext();
@@ -626,8 +609,7 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<vector::LoadOp>(vector::LoadOp op) {
+  LogicalResult infer(vector::LoadOp op) {
     auto src_ty = op.getMemRefType();
     auto res_ty = op.getVectorType();
     CHECK_OP(src_ty.getRank() == res_ty.getRank(),
@@ -705,9 +687,7 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<vector::ExtractStridedSliceOp>(
-      vector::ExtractStridedSliceOp op) {
+  LogicalResult infer(vector::ExtractStridedSliceOp op) {
     auto input_layout = getLayout(op.getVector());
     auto offsets = op.getOffsets().getValue();
     auto sizes = op.getSizes().getValue();
@@ -729,9 +709,7 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<vector::MultiDimReductionOp>(
-      vector::MultiDimReductionOp op) {
+  LogicalResult infer(vector::MultiDimReductionOp op) {
     auto src_ty = op.getSourceVectorType();
     auto dst_ty = dyn_cast<VectorType>(op.getDestType());
     CHECK_OP(dst_ty, "only reductions with vector results supported");
@@ -766,8 +744,7 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<vector::ShapeCastOp>(vector::ShapeCastOp op) {
+  LogicalResult infer(vector::ShapeCastOp op) {
     auto src_ty = op.getSourceVectorType();
     auto src_shape = src_ty.getShape();
     int64_t src_rank = src_ty.getRank();
@@ -859,8 +836,7 @@ class VectorLayoutInferer {
     return failure();
   }
 
-  template <>
-  LogicalResult infer<vector::StoreOp>(vector::StoreOp op) {
+  LogicalResult infer(vector::StoreOp op) {
     auto ref_ty = op.getMemRefType();
     auto store_ty = op.getValueToStore().getType();
     CHECK_OP(ref_ty.getRank() == store_ty.getRank(),
@@ -930,8 +906,7 @@ class VectorLayoutInferer {
     return success();
   }
 
-  template <>
-  LogicalResult infer<vector::TransposeOp>(vector::TransposeOp op) {
+  LogicalResult infer(vector::TransposeOp op) {
     auto permutation_attrs = op.getTransp().getValue();
     auto some_layout = getLayout(op.getVector());
     CHECK_OP(some_layout.has_value(), "missing vector layout");
@@ -1220,4 +1195,3 @@ std::unique_ptr<OperationPass<func::FuncOp>> createInferVectorLayoutPass(
 }
 
 }  // namespace mlir::tpu
-
