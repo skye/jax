@@ -62,11 +62,10 @@ pybind_extension(
     name = "_tpu_ext",
     srcs = ["tpu_ext.cc"],
     deps = [
-        "//jaxlib/tpu:tpu_dialect",
-        "//jaxlib/tpu:tpu_dialect_capi",
-        "@llvm-project//mlir:CAPIIR",
-        "@llvm-project//mlir:IR",
-        "@llvm-project//mlir:MLIRBindingsPythonHeadersAndDeps",
+        "//jaxlib/mlir/_mlir_libs:jaxlib_mlir_capi_shared_library",
+        "//jaxlib/tpu:tpu_dialect_capi_headers",
+        "@llvm-project//mlir:CAPIIRHeaders",
+        "@llvm-project//mlir:MLIRBindingsPythonHeaders",
         "@pybind11",
     ],
 )

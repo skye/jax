@@ -24,14 +24,14 @@ import jax
 from jax import core
 from jax.interpreters import mlir
 from jax.interpreters import xla
-from mlir import ir
-from mlir.dialects import stablehlo
-from mlir.passmanager import PassManager
+from jaxlib.mlir import ir
+from jaxlib.mlir.dialects import stablehlo
+from jaxlib.mlir.passmanager import PassManager
 import numpy as np
 
-from jax.jaxlib.tpu.python import apply_vector_layout
-from jax.jaxlib.tpu.python import infer_memref_layout
-from jax.jaxlib.tpu.python import tpu
+from jaxlib.tpu.python import apply_vector_layout
+from jaxlib.tpu.python import infer_memref_layout
+from jaxlib.tpu.python import tpu
 
 
 tpu_custom_call_p = core.Primitive("tpu_custom_call")

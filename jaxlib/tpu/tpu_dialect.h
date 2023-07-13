@@ -46,12 +46,18 @@ namespace tpu {
 
 std::pair<bool, bool> mightCommunicateBetweenChips(Operation* op);
 
+std::unique_ptr<OperationPass<func::FuncOp>> createInferVectorLayoutPass(
+    int lane_count = 128, int sublane_count = 8);
+
 std::unique_ptr<OperationPass<func::FuncOp>>
 createLogicalToPhysicalDeviceIdPass(int64_t total_devices);
 
 // In Mosaic, we often strip tiled layouts from memrefs, for compatibility with
 // vector ops. This functions inverts the layout erasure applied to the value.
 MemRefType getMemRefType(Value value);
+
+#define GEN_PASS_REGISTRATION
+#include "jaxlib/tpu/tpu_passes.h.inc"
 
 }  // namespace tpu
 }  // namespace mlir

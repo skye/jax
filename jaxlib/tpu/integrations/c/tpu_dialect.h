@@ -2,6 +2,7 @@
 #define JAXLIB_TPU_INTEGRATIONS_C_TPU_DIALECT_H_
 
 #include "mlir-c/IR.h"
+#include "mlir-c/Support.h"
 
 #ifdef __cplusplus
 extern "C" {

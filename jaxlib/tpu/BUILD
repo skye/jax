@@ -46,6 +46,7 @@ cc_library(
         "layout.cc",
         "tpu_dialect.cc",
         "tpu_ops.cc",
+        "transforms/infer_vector_layout.cc",
     ],
     hdrs = [
         "layout.h",
@@ -129,14 +130,14 @@ gentbl_cc_library(
                 "-gen-pass-capi-header",
                 "--prefix=TPU",
             ],
-            "dialect/tpu/integrations/c/tpu_passes.capi.h.inc",
+            "integrations/c/tpu_passes.capi.h.inc",
         ),
         (
             [
                 "-gen-pass-capi-impl",
                 "--prefix=TPU",
             ],
-            "dialect/tpu/integrations/c/tpu_passes.capi.cc.inc",
+            "integrations/c/tpu_passes.capi.cc.inc",
         ),
     ],
     tblgen = "@llvm-project//mlir:mlir-tblgen",
@@ -163,10 +164,12 @@ td_library(
 
 TPU_CAPI_SOURCES = [
     "integrations/c/tpu_dialect.cc",
+    "integrations/c/tpu_passes.capi.cc.inc",
 ]
 
 TPU_CAPI_HEADERS = [
     "integrations/c/tpu_dialect.h",
+    "integrations/c/tpu_passes.capi.h.inc",
 ]
 
 cc_library(
