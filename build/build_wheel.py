@@ -98,6 +98,17 @@ _OPTIONAL_XLA_EXTENSION_STUBS = [
 ]
 
 
+def patch_copy_mlir_import(src_file, dst_dir):
+  src_file = r.Rlocation(src_file)
+  src_filename = os.path.basename(src_file)
+  with open(src_file) as f:
+    src = f.read()
+
+  with open(os.path.join(dst_dir, src_filename), 'w') as f:
+    replaced = re.sub(r'^from mlir(\..*)? import (.*)', r'from jaxlib.mlir\1 import \2', src, flags=re.MULTILINE)
+    f.write(replaced)
+
+
 def patch_copy_xla_extension_stubs(dst_dir):
   # This file is required by PEP-561. It marks jaxlib as package containing
   # type stubs.
@@ -169,6 +180,7 @@ def prepare_wheel(sources_path):
   copy_to_jaxlib("__main__/jaxlib/gpu_triton.py")
   copy_to_jaxlib("__main__/jaxlib/gpu_solver.py")
   copy_to_jaxlib("__main__/jaxlib/gpu_sparse.py")
+  copy_to_jaxlib("__main__/jaxlib/tpu_mosaic.py")
   copy_to_jaxlib("__main__/jaxlib/version.py")
   copy_to_jaxlib("__main__/jaxlib/xla_client.py")
   copy_to_jaxlib(f"__main__/jaxlib/xla_extension.{pyext}")
@@ -222,9 +234,19 @@ def prepare_wheel(sources_path):
   copy_file("__main__/jaxlib/mlir/dialects/_ml_program_ops_gen.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/_sparse_tensor_ops_gen.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/sparse_tensor.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/arith.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/_arith_ops_gen.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/_arith_ops_ext.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/math.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/_math_ops_gen.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/scf.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/_scf_ops_gen.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/_scf_ops_ext.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/builtin.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/chlo.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/mhlo.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/vector.py", dst_dir=mlir_dialects_dir)
+  copy_file("__main__/jaxlib/mlir/dialects/_vector_ops_gen.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/stablehlo.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/func.py", dst_dir=mlir_dialects_dir)
   copy_file("__main__/jaxlib/mlir/dialects/ml_program.py", dst_dir=mlir_dialects_dir)
@@ -245,6 +267,19 @@ def prepare_wheel(sources_path):
   else:
     copy_file("__main__/jaxlib/mlir/_mlir_libs/libjaxlib_mlir_capi.so", dst_dir=mlir_libs_dir)
   patch_copy_xla_extension_stubs(jaxlib_dir)
+
+  if exists(f"__main__/jaxlib/tpu/python/_tpu_ext.{pyext}"):
+    tpu_dir = os.path.join(jaxlib_dir, "tpu")
+    tpu_python_dir = os.path.join(tpu_dir, 'python')
+    os.makedirs(tpu_dir)
+    os.makedirs(tpu_python_dir)
+
+    copy_file(f"__main__/jaxlib/tpu/python/_tpu_ext.{pyext}", dst_dir=tpu_python_dir)
+    copy_file("__main__/jaxlib/tpu/python/_tpu_ops_ext.py", dst_dir=tpu_python_dir)
+    patch_copy_mlir_import("__main__/jaxlib/tpu/python/_tpu_gen.py", dst_dir=tpu_python_dir)
+    copy_file("__main__/jaxlib/tpu/python/tpu.py", dst_dir=tpu_python_dir)
+    patch_copy_mlir_import("__main__/jaxlib/tpu/python/apply_vector_layout.py", dst_dir=tpu_python_dir)
+    patch_copy_mlir_import("__main__/jaxlib/tpu/python/infer_memref_layout.py", dst_dir=tpu_python_dir)
 
 
 def edit_jaxlib_version(sources_path):
