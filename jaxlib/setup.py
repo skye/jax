@@ -88,6 +88,7 @@ setup(
             'cpu/*',
             'cuda/*',
             'cuda/nvvm/libdevice/libdevice*',
+            'tpu/python/*',
             'mlir/*.py',
             'mlir/dialects/*.py',
             'mlir/_mlir_libs/*.dll',
