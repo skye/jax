@@ -27,8 +27,8 @@ limitations under the License.
 #include "mlir-c/IR.h"
 #include "mlir-c/Support.h"
 #include "mlir/Bindings/Python/PybindAdaptors.h"
-#include "third_party/pybind11/include/pybind11/detail/common.h"
-#include "third_party/pybind11/include/pybind11/pytypes.h"
+#include "pybind11/detail/common.h"
+#include "pybind11/pytypes.h"
 
 PYBIND11_MODULE(_tpu_ext, m) {
   mlirRegisterTPUPasses();  // Register all passes on load.

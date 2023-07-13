@@ -1,7 +1,7 @@
-#ifndef PLATFORMS_XLA_MOSAIC_DIALECT_TPU_INTEGRATIONS_C_TPU_DIALECT_H_
-#define PLATFORMS_XLA_MOSAIC_DIALECT_TPU_INTEGRATIONS_C_TPU_DIALECT_H_
+#ifndef JAXLIB_TPU_INTEGRATIONS_C_TPU_DIALECT_H_
+#define JAXLIB_TPU_INTEGRATIONS_C_TPU_DIALECT_H_
 
-#include "third_party/llvm/llvm-project/mlir/include/mlir-c/IR.h"
+#include "mlir-c/IR.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,4 +24,4 @@ MLIR_CAPI_EXPORTED void mlirTPUAnalyzePotentialCommunication(
 }
 #endif
 
-#endif  // PLATFORMS_XLA_MOSAIC_DIALECT_TPU_INTEGRATIONS_C_TPU_DIALECT_H_
+#endif  // JAXLIB_TPU_INTEGRATIONS_C_TPU_DIALECT_H_

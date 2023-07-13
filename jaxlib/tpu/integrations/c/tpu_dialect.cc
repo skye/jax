@@ -1,11 +1,11 @@
-#include "platforms/xla/mosaic/dialect/tpu/integrations/c/tpu_dialect.h"
+#include "jaxlib/tpu/integrations/c/tpu_dialect.h"
 
-#include "platforms/xla/mosaic/dialect/tpu/tpu_dialect.h"
-#include "third_party/llvm/llvm-project/mlir/include/mlir/CAPI/Pass.h"
-#include "third_party/llvm/llvm-project/mlir/include/mlir/CAPI/Registration.h"
-#include "third_party/llvm/llvm-project/mlir/include/mlir/CAPI/Support.h"
-#include "third_party/llvm/llvm-project/mlir/include/mlir/IR/Attributes.h"
-#include "third_party/llvm/llvm-project/mlir/include/mlir/IR/BuiltinAttributes.h"
+#include "jaxlib/tpu/tpu_dialect.h"
+#include "mlir/CAPI/Pass.h"
+#include "mlir/CAPI/Registration.h"
+#include "mlir/CAPI/Support.h"
+#include "mlir/IR/Attributes.h"
+#include "mlir/IR/BuiltinAttributes.h"
 
 extern "C" {
 
@@ -38,5 +38,5 @@ void mlirTPUAnalyzePotentialCommunication(MlirOperation op,
 
 using namespace mlir::tpu;
 
-#include "platforms/xla/mosaic/dialect/tpu/integrations/c/tpu_passes.capi.cc.inc"
+#include "jaxlib/tpu/integrations/c/tpu_passes.capi.cc.inc"
 }

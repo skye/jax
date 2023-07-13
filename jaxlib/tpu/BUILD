@@ -129,7 +129,14 @@ gentbl_cc_library(
                 "-gen-pass-capi-header",
                 "--prefix=TPU",
             ],
-            "integrations/c/tpu_passes.capi.h.inc",
+            "dialect/tpu/integrations/c/tpu_passes.capi.h.inc",
+        ),
+        (
+            [
+                "-gen-pass-capi-impl",
+                "--prefix=TPU",
+            ],
+            "dialect/tpu/integrations/c/tpu_passes.capi.cc.inc",
         ),
     ],
     tblgen = "@llvm-project//mlir:mlir-tblgen",
