@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Page Title</title>
+    <link rel="icon" href="favicon.png"/>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+  </head>
+
+  <body>
+    <main>
+      <div class="content">
+
+        <!---------------- banner --------------------------------------->
+        <div class="hero">
+          <div class="hero-left">
+            <img src="jax_logo_250px.png"/>
+            <h2>High performance array computing</h2>
+            <p>JAX is a Python library for accelerator-oriented array computation and program transformation, designed for high-performance numerical computing and large-scale machine learning.</p>
+          </div>
+          <img src="jax-hero.svg"/>
+        </div>
+
+        <!---------------- features --------------------------------------->
+        <div class="features">
+          <div>
+            <h2>Familiar API</h2>
+            <p>JAX provides a familiar NumPy-style API for ease of adoption by researchers and engineers.</p>
+          </div>
+          <div>
+            <h2>Transformations</h2>
+            <p>JAX includes composable function transformations for compilation, batching, automatic differentiation, and parallelization.</p>
+          </div>
+          <div>
+            <h2>Run anywhere</h2>
+            <p>The same code executes on multiple backends, including CPU, GPU, & TPU</p>
+          </div>
+        </div>
+
+        <!---------------- actions --------------------------------------->
+        <div class="actions">
+          <div>
+            <a href="https://docs.jax.dev/en/latest/installation.html#installation" class="action-button">
+              <span class="material-icons">laptop_chromebook</span>
+              Installation
+            </a>
+            <a href="https://docs.jax.dev/en/latest/beginner_guide.html#beginner-guide" class="action-button">
+              <span class="material-icons">rocket_launch</span>
+              Getting started
+            </a>
+            <a href="https://docs.jax.dev/en/latest/user_guides.html#user-guides" class="action-button">
+              <span class="material-icons">library_books</span>
+              User guides
+            </a>
+          </div>
+          <p>If you’re looking to train neural networks, use <a href="https://flax.readthedocs.io/">Flax</a> and start with its tutorials.<br />
+            For an end-to-end transformer library built on JAX, see <a href="https://github.com/google/maxtext/">MaxText</a>.</p>
+        </div>
+
+        <!---------------- ecosystem --------------------------------------->
+        <div class="ecosystem">
+          <h2>The JAX Ecosystem</h2>
+          <p>JAX itself is narrowly-scoped and focuses on efficient array
+            operations and program transformations. Built around JAX is an evolving
+            ecosystem of machine learning and numerical computing tools; the following is
+            just a small sample of what is out there:</p>
+          <div class="ecosystem-grid">
+            <div class="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-symbols-outlined">hub</span>
+                <h3>Neural networks</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://flax.readthedocs.io/">Flax</a></p></li>
+                <li><p><a href="https://docs.kidger.site/equinox/">Equinox</a></p></li>
+                <li><p><a href="https://keras.io/">Keras</a></p></li>
+              </ul>
+            </div>
+            <div class="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-icons">show_chart</span>
+                <h3>Optimizers &amp; solvers</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://optax.readthedocs.io/">Optax</a></p></li>
+                <li><p><a href="https://github.com/patrick-kidger/optimistix">Optimistix</a></p></li>
+                <li><p><a href="https://github.com/patrick-kidger/lineax">Lineax</a></p></li>
+                <li><p><a href="https://docs.kidger.site/diffrax/">Diffrax</a></p></li>
+              </ul>
+            </div>
+            <div class ="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-icons">storage</span>
+                <h3>Data loading</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://github.com/google/grain">Grain</a></p></li>
+                <li><p><a href="https://www.tensorflow.org/datasets">TensorFlow Datasets</a></p></li>
+                <li><p><a href="https://huggingface.co/docs/datasets/">Hugging Face Datasets</a></p></li>
+              </ul>
+            </div>
+            <div class ="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-symbols-outlined">save</span>
+                <h3>Checkpointing and model export</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://orbax.readthedocs.io/">Orbax</a></p></li>
+              </ul>
+            </div>
+            <div class ="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-symbols-outlined">lan</span>
+                <h3>Probabilistic programming</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://blackjax-devs.github.io/blackjax/">Blackjax</a></p></li>
+                <li><p><a href="https://num.pyro.ai/en/latest/index.html">Numpyro</a></p></li>
+                <li><p><a href="https://www.pymc.io/">PyMC</a></p></li>
+              </ul>
+            </div>
+            <div class ="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-icons">bar_chart</span>
+                <h3>Probabilistic modeling</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://www.tensorflow.org/probability">TensorFlow Probabilty</a></p></li>
+                <li><p><a href="https://github.com/google-deepmind/distrax">Distrax</a></p></li>
+              </ul>
+            </div>
+            <div class ="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-icons">animation</span>
+                <h3>Physics &amp; simulation</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://www.tensorflow.org/probability">TensorFlow Probabilty</a></p></li>
+                <li><p><a href="https://github.com/google-deepmind/distrax">Distrax</a></p></li>
+              </ul>
+            </div>
+            <div class ="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-icons">language</span>
+                <h3>LLMs</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://github.com/google/maxtext/">MaxText</a></p></li>
+                <li><p><a href="https://github.com/apple/axlearn">AXLearn</a></p></li>
+                <li><p><a href="https://github.com/stanford-crfm/levanter">Levanter</a></p></li>
+                <li><p><a href="https://github.com/young-geng/EasyLM">EasyLM</a></p></li>
+              </ul>
+            </div>
+            <div class ="ecosystem-grid-item">
+              <div class="ecosystem-grid-item-title">
+                <span class="material-symbols-outlined">construction</span>
+                <h3>Miscellaneous tools</h3>
+              </div>
+              <ul>
+                <li><p><a href="https://chex.readthedocs.io/">Chex</a></p></li>
+              </ul>
+            </div>
+          </div>
+
+          <p>Many more JAX-based libraries have been developed; the community-run <a class="reference external" href="https://github.com/n2cholas/awesome-jax">Awesome JAX</a> page
+            maintains an up-to-date list.</p>
+        </div>
+        <footer>
+          © Copyright 2024, the JAX Authors.
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>
